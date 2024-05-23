@@ -2,7 +2,6 @@
 # Wordpressin asennus. **VAATII** että on webserveri ja mysql ym vaadittavat asennettuna :D
 # Toki, varmaan jossai kohi lisään ne tähä, ny ei ollu tarvetta
 # Helpotan vaan omaa elämääni tällä
-# curl -o- https://raw.githubusercontent.com/Onsqa/Scripts/main/install-wordpress.sh.sh | bash
 if [[ $EUID -ne 0 ]]; then
     echo "Tämä skripti vaatii root oikeudet"
     exit 1
@@ -25,6 +24,10 @@ fi
 
 # Luodaan tietokanta
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`;"
+if [ $? -ne 0 ]; then
+    echo "Virhe tietokantaa luodessa"
+    exit 1
+fi
 
 # Tarkistetaan onko käyttäjä jo olemassa
 USER_EXISTS=$(sudo mysql -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$DB_USER' AND host = '$DB_HOST');")
@@ -41,9 +44,17 @@ fi
 # Ladataan wordpress
 TMP_FILE=$(mktemp)
 wget $WP_URL -O "$TMP_FILE"
+if [ $? -ne 0 ]; then
+    echo "Virhe ladatessa Wordpressiä"
+    exit 1
+fi
 
 # Puretaan wordpress 
 tar -xzf "$TMP_FILE" -C /tmp
+if [ $? -ne 0 ]; then
+    echo "Virhe purkaessa Wordpressiä"
+    exit 1
+fi
 rm "$TMP_FILE"
 
 # Siirretään tiedostot asennuskansioon
