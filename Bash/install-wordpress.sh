@@ -2,6 +2,7 @@
 # Wordpressin asennus. **VAATII** että on webserveri ja mysql ym vaadittavat asennettuna :D
 # Toki, varmaan jossai kohi lisään ne tähä, ny ei ollu tarvetta
 # Helpotan vaan omaa elämääni tällä
+# curl -o- https://raw.githubusercontent.com/Onsqa/Scripts/main/install-wordpress.sh.sh | bash
 if [[ $EUID -ne 0 ]]; then
     echo "Tämä skripti vaatii root oikeudet"
     exit 1
@@ -48,6 +49,11 @@ rm "$TMP_FILE"
 # Siirretään tiedostot asennuskansioon
 mv /tmp/wordpress/* "$WP_DIR"
 
+
+# Päivitetään tiedostojen käyttöoikeudet
+chown -R www-data:www-data "$WP_DIR"
+find "$WP_DIR" -type d -exec chmod 755 {} \;
+find "$WP_DIR" -type f -exec chmod 644 {} \;
 
 # Config tiedoston luonti
 cp "$WP_DIR/wp-config-sample.php" "$WP_DIR/wp-config.php"
